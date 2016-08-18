@@ -1,3 +1,5 @@
+Just a modified version of http://www.rcgroups.com/forums/showthread.php?t=2681167 ... 
+
 Install betaflight to board
 
 #TARANIS CONFIG:
