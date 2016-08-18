@@ -1,26 +1,27 @@
 Install betaflight to board
 
+TARANIS CONFIG:
+
 Copy LUA file to /SCRIPTS/«modelname»/telemXX.lua (on old taranis versions) - For telemetry scripts
 COPY LUA file to /SCRIPTS/TELEMETRY/telemXX.lua (on newer taranis versions) 
 
 Go to telemetry and set Screen 1 to "Script" and set the script as telemXX (whatever number you chose)
 
-Configure your ranges in cleanflight for PID:
+Setup AUX4 to the S2 knob
+Setup AUX3 to the SC 3 position switch
 
-adjrange 0 0 4 1425 1575 0 5
-adjrange 1 0 4 1350 1400 6 5
-adjrange 2 0 4 1275 1325 7 5
-adjrange 3 0 4 1200 1250 8 5
-adjrange 4 0 4 1125 1175 9 5
-adjrange 5 0 4 1050 1100 10 5
-adjrange 6 0 4 900 1025 11 5
-adjrange 7 0 4 1600 1650 4 5
-adjrange 8 0 4 1675 1725 5 5
-adjrange 9 0 4 1750 1800 1 5
-adjrange 10 0 4 1825 1875 2 5
-adjrange 11 0 4 1900 1950 3 5
-adjrange 12 0 4 1975 2100 0 5
-adjrange 13 0 0 900 900 0 0
-adjrange 14 0 0 900 900 0 0
+CLEANFLIGHT CONFIG: 
 
+Paste these ranges into betaflight CLI and save
 
+# adjrange
+adjrange 0 0 3 1000 1100 15 2
+adjrange 1 0 3 1100 1200 16 2
+adjrange 2 0 3 1200 1300 17 2
+adjrange 3 0 3 1300 1400 18 2
+adjrange 4 0 3 1400 1475 19 2
+adjrange 5 0 3 1525 1600 20 2
+adjrange 6 0 3 1600 1700 9 2
+adjrange 7 0 3 1700 1800 10 2
+adjrange 8 0 3 1800 1900 11 2
+adjrange 9 0 3 1900 2000 1 2
