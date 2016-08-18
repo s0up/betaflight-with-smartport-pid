@@ -34,3 +34,7 @@ adjrange 7 0 3 1700 1800 10 2
 adjrange 8 0 3 1800 1900 11 2
 
 adjrange 9 0 3 1900 2000 1 2
+
+#How to use
+
+From home screen on taranis, hold down page to pull up the telem script, use the S2 knob to move through the different settings, and press SC forward to decrease, SC backwards to increase.  To save, move your sticks to throttle bottom, yaw left, pitch bottom, roll right
