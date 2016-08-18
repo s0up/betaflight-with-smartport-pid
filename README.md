@@ -1,6 +1,6 @@
 Install betaflight to board
 
-TARANIS CONFIG:
+#TARANIS CONFIG:
 
 Copy LUA file to /SCRIPTS/«modelname»/telemXX.lua (on old taranis versions) - For telemetry scripts
 COPY LUA file to /SCRIPTS/TELEMETRY/telemXX.lua (on newer taranis versions) 
@@ -10,11 +10,11 @@ Go to telemetry and set Screen 1 to "Script" and set the script as telemXX (what
 Setup AUX4 to the S2 knob
 Setup AUX3 to the SC 3 position switch
 
-CLEANFLIGHT CONFIG: 
+#CLEANFLIGHT CONFIG: 
 
 Paste these ranges into betaflight CLI and save
 
-# adjrange
+# Ranges
 adjrange 0 0 3 1000 1100 15 2
 
 adjrange 1 0 3 1100 1200 16 2
