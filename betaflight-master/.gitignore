@@ -1,0 +1,20 @@
+*.o
+.DS_Store
+*~
+*.uvopt
+*.dep
+*.bak
+*.uvgui.*
+*.swp
+*.save
+.project
+.settings
+.cproject
+obj/
+patches/
+startup_stm32f10x_md_gcc.s
+
+# script-generated files
+docs/Manual.pdf
+README.pdf
+
