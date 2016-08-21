@@ -382,10 +382,13 @@ void handleSmartPortTelemetry(void)
                 }
                 break;
             case FSSP_DATAID_FUEL       :
+                smartPortSendPackage(id, getT2());
+                smartPortHasRequest = 0;
+            /*
                 if (feature(FEATURE_CURRENT_METER)) {
                     smartPortSendPackage(id, mAhDrawn); // given in mAh, unknown requested unit
                     smartPortHasRequest = 0;
-                }
+                }*/
                 break;
             //case FSSP_DATAID_ADC1       :
             //case FSSP_DATAID_ADC2       :
@@ -484,8 +487,17 @@ void handleSmartPortTelemetry(void)
                 break;
 
             case FSSP_DATAID_T2         :
-                smartPortSendPackage(id, getT2());
-                smartPortHasRequest = 0;
+                if (sensors(SENSOR_GPS)) {
+#ifdef GPS
+                    // provide GPS lock status
+                    smartPortSendPackage(id, (STATE(GPS_FIX) ? 1000 : 0) + (STATE(GPS_FIX_HOME) ? 2000 : 0) + GPS_numSat);
+                    smartPortHasRequest = 0;
+#endif
+                }
+                else if (feature(FEATURE_GPS)) {
+                    smartPortSendPackage(id, 0);
+                    smartPortHasRequest = 0;
+                }
             break;
 #ifdef GPS
             case FSSP_DATAID_GPS_ALT    :
