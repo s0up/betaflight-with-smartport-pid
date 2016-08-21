@@ -343,8 +343,9 @@ void handleSmartPortTelemetry(void)
         }
         smartPortIdCnt++;
 
+        /*
         int32_t tmpi;
-        static uint8_t t1Cnt = 0;
+        static uint8_t t1Cnt = 0;*/
 
         switch(id) {
 #ifdef GPS
@@ -382,13 +383,11 @@ void handleSmartPortTelemetry(void)
                 }
                 break;
             case FSSP_DATAID_FUEL       :
-                smartPortSendPackage(id, getT2());
-                smartPortHasRequest = 0;
-            /*
+            
                 if (feature(FEATURE_CURRENT_METER)) {
                     smartPortSendPackage(id, mAhDrawn); // given in mAh, unknown requested unit
                     smartPortHasRequest = 0;
-                }*/
+                }
                 break;
             //case FSSP_DATAID_ADC1       :
             //case FSSP_DATAID_ADC2       :
@@ -444,6 +443,7 @@ void handleSmartPortTelemetry(void)
                 // we send all the flags as decimal digits for easy reading
 
                 // the t1Cnt simply allows the telemetry view to show at least some changes
+            /*
                 t1Cnt++;
                 if (t1Cnt >= 4) {
                     t1Cnt = 1;
@@ -483,6 +483,9 @@ void handleSmartPortTelemetry(void)
                     tmpi += 4000;
 
                 smartPortSendPackage(id, (uint32_t)tmpi);
+                smartPortHasRequest = 0;*/
+
+                smartPortSendPackage(id, getT2());
                 smartPortHasRequest = 0;
                 break;
 
