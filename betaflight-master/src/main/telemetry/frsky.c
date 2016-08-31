@@ -455,12 +455,12 @@ static void sendAmperage(void)
 static void sendFuelLevel(void)
 {
     sendDataHead(ID_FUEL_LEVEL);
-
     /*
+
     if (batteryConfig->batteryCapacity > 0) {
         serialize16((uint16_t)calculateBatteryCapacityRemainingPercentage());
     } else {
-        serialize16((uint16_t)constrain(getPIDVal(), 0, 0xFFFF));
+        serialize16((uint16_t)constrain(mAhDrawn, 0, 0xFFFF));
     }*/
 
     serialize16((uint16_t)getPIDVal());

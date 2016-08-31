@@ -2,7 +2,6 @@
  * SmartPort Telemetry implementation by frank26080115
  * see https://github.com/frank26080115/cleanflight/wiki/Using-Smart-Port
  */
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -343,9 +342,8 @@ void handleSmartPortTelemetry(void)
         }
         smartPortIdCnt++;
 
-        /*
-        int32_t tmpi;
-        static uint8_t t1Cnt = 0;*/
+        //int32_t tmpi;
+        //static uint8_t t1Cnt = 0;
 
         switch(id) {
 #ifdef GPS
@@ -383,7 +381,6 @@ void handleSmartPortTelemetry(void)
                 }
                 break;
             case FSSP_DATAID_FUEL       :
-            
                 if (feature(FEATURE_CURRENT_METER)) {
                     smartPortSendPackage(id, mAhDrawn); // given in mAh, unknown requested unit
                     smartPortHasRequest = 0;
@@ -440,10 +437,10 @@ void handleSmartPortTelemetry(void)
                 smartPortHasRequest = 0;
                 break;
             case FSSP_DATAID_T1         :
+            /*
                 // we send all the flags as decimal digits for easy reading
 
                 // the t1Cnt simply allows the telemetry view to show at least some changes
-            /*
                 t1Cnt++;
                 if (t1Cnt >= 4) {
                     t1Cnt = 1;
@@ -487,8 +484,8 @@ void handleSmartPortTelemetry(void)
 
                 smartPortSendPackage(id, getT2());
                 smartPortHasRequest = 0;
-                break;
 
+                break;
             case FSSP_DATAID_T2         :
                 if (sensors(SENSOR_GPS)) {
 #ifdef GPS
@@ -501,7 +498,7 @@ void handleSmartPortTelemetry(void)
                     smartPortSendPackage(id, 0);
                     smartPortHasRequest = 0;
                 }
-            break;
+                break;
 #ifdef GPS
             case FSSP_DATAID_GPS_ALT    :
                 if (sensors(SENSOR_GPS) && STATE(GPS_FIX)) {

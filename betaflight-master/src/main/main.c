@@ -597,8 +597,7 @@ void init(void)
         masterConfig.gyro_sync_denom = 1;
     }
 
-    setTargetPidLooptime(masterConfig.pid_process_denom); // Initialize pid looptime
-
+    setTargetPidLooptime(gyro.targetLooptime * masterConfig.pid_process_denom); // Initialize pid looptime
 
 #ifdef BLACKBOX
     initBlackbox();
@@ -675,7 +674,7 @@ void main_init(void)
 
     /* Setup scheduler */
     schedulerInit();
-    rescheduleTask(TASK_GYROPID, gyro.targetLooptime);
+    rescheduleTask(TASK_GYROPID, gyro.targetLooptime); // Add a littlebit of extra time to reduce busy wait
     setTaskEnabled(TASK_GYROPID, true);
 
     if (sensors(SENSOR_ACC)) {
