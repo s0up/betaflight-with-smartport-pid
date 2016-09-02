@@ -12,7 +12,7 @@ Go to telemetry and set Screen 1 to "Script" and set the script as telemXX (what
 Setup AUX4 to the S2 knob
 Setup AUX3 to the SC 3 position switch
 
-Change fuel data type in telemetry to “-“ and set precision to 0.xx
+Change Tmp1 data type in telemetry to “-“ and set precision to 0.xx
 
 #CLEANFLIGHT CONFIG: 
 

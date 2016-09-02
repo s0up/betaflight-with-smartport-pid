@@ -211,14 +211,42 @@ static void sendThrottleOrBatterySizeAsRpm(rxConfig_t *rxConfig, uint16_t deadba
 
 }
 
+int getPIDVal() {
+  int a=rcData[AUX4];
+  
+  pidProfile_t p=currentProfile->pidProfile;
+  const controlRateConfig_t *r = getControlRateConfig(getCurrentControlRateProfile());
+
+  //Ordering 
+  //Pitch P I D Roll P I D Yaw P I D RCRATE
+
+  if(a > 1000 && a < 1100) return p.P8[PIDPITCH];
+  if(a > 1100 && a < 1200) return p.I8[PIDPITCH];
+  if(a > 1200 && a < 1300) return p.D8[PIDPITCH];
+
+  if(a > 1300 && a < 1400) return p.P8[PIDROLL];
+  if(a > 1400 && a < 1480) return p.I8[PIDROLL];
+  if(a > 1520 && a < 1600) return p.D8[PIDROLL];
+
+  if(a > 1600 && a < 1700) return p.P8[PIDYAW];
+  if(a > 1700 && a < 1800) return p.I8[PIDYAW];
+  if(a > 1800 && a < 1900) return p.D8[PIDYAW];
+
+  if(a > 1900 && a < 2000) return r->rcRate8;
+  
+  return -1;
+}
+
 static void sendTemperature1(void)
 {
     sendDataHead(ID_TEMPRATURE1);
+    /*
 #ifdef BARO
     serialize16((baroTemperature + 50)/ 100); //Airmamaf
 #else
     serialize16(telemTemperature1 / 10);
-#endif
+#endif*/
+    serialize16(getPIDVal());
 }
 
 #ifdef GPS
@@ -342,33 +370,6 @@ static void sendGPSLatLong(void)
     }
 }
 #endif
-
-int getPIDVal() {
-  int a=rcData[AUX4];
-  
-  pidProfile_t p=currentProfile->pidProfile;
-  const controlRateConfig_t *r = getControlRateConfig(getCurrentControlRateProfile());
-
-  //Ordering 
-  //Pitch P I D Roll P I D Yaw P I D RCRATE
-
-  if(a > 1000 && a < 1100) return p.P8[PIDPITCH];
-  if(a > 1100 && a < 1200) return p.I8[PIDPITCH];
-  if(a > 1200 && a < 1300) return p.D8[PIDPITCH];
-
-  if(a > 1300 && a < 1400) return p.P8[PIDROLL];
-  if(a > 1400 && a < 1480) return p.I8[PIDROLL];
-  if(a > 1520 && a < 1600) return p.D8[PIDROLL];
-
-  if(a > 1600 && a < 1700) return p.P8[PIDYAW];
-  if(a > 1700 && a < 1800) return p.I8[PIDYAW];
-  if(a > 1800 && a < 1900) return p.D8[PIDYAW];
-
-  if(a > 1900 && a < 2000) return r->rcRate8;
-  
-  return -1;
-}
-
 /*
  * Send vertical speed for opentx. ID_VERT_SPEED
  * Unit is cm/s
@@ -455,15 +456,12 @@ static void sendAmperage(void)
 static void sendFuelLevel(void)
 {
     sendDataHead(ID_FUEL_LEVEL);
-    /*
 
     if (batteryConfig->batteryCapacity > 0) {
         serialize16((uint16_t)calculateBatteryCapacityRemainingPercentage());
     } else {
         serialize16((uint16_t)constrain(mAhDrawn, 0, 0xFFFF));
-    }*/
-
-    serialize16((uint16_t)getPIDVal());
+    }
 }
 
 static void sendHeading(void)
