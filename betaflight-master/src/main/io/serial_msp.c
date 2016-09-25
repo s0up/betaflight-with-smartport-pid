@@ -526,7 +526,7 @@ void mspInit(serialConfig_t *serialConfig)
 #endif
 
     activeBoxIds[activeBoxIdCount++] = BOXFPVANGLEMIX;
-    
+
     if (feature(FEATURE_3D)) {
     	activeBoxIds[activeBoxIdCount++] = BOX3DDISABLESWITCH;
     }
@@ -538,11 +538,11 @@ void mspInit(serialConfig_t *serialConfig)
     if (feature(FEATURE_INFLIGHT_ACC_CAL)) {
         activeBoxIds[activeBoxIdCount++] = BOXCALIB;
     }
-	
+
     if (feature(FEATURE_OSD)) {
 	activeBoxIds[activeBoxIdCount++] = BOXOSD;
     }
-	
+
 #ifdef TELEMETRY
     if (feature(FEATURE_TELEMETRY) && masterConfig.telemetryConfig.telemetry_switch) {
         activeBoxIds[activeBoxIdCount++] = BOXTELEMETRY;
@@ -599,7 +599,8 @@ static uint32_t packFlightModeFlags(void)
         IS_ENABLED(ARMING_FLAG(ARMED)) << BOXARM |
         IS_ENABLED(IS_RC_MODE_ACTIVE(BOXBLACKBOX)) << BOXBLACKBOX |
         IS_ENABLED(FLIGHT_MODE(FAILSAFE_MODE)) << BOXFAILSAFE |
-        IS_ENABLED(IS_RC_MODE_ACTIVE(BOXAIRMODE)) << BOXAIRMODE;
+        IS_ENABLED(IS_RC_MODE_ACTIVE(BOXAIRMODE)) << BOXAIRMODE |
+        IS_ENABLED(IS_RC_MODE_ACTIVE(BOXFPVANGLEMIX)) << BOXFPVANGLEMIX;
 
     for (i = 0; i < activeBoxIdCount; i++) {
         int flag = (tmp & (1 << activeBoxIds[i]));
@@ -1196,10 +1197,16 @@ static bool processOutCommand(uint8_t cmdMSP)
 
     case MSP_OSD_CONFIG:
 #ifdef OSD
-        headSerialReply(2 + (OSD_MAX_ITEMS * 2));
+        headSerialReply(10 + (OSD_MAX_ITEMS * 2));
         serialize8(1); // OSD supported
         // send video system (AUTO/PAL/NTSC)
         serialize8(masterConfig.osdProfile.video_system);
+        serialize8(masterConfig.osdProfile.units);
+        serialize8(masterConfig.osdProfile.rssi_alarm);
+        serialize16(masterConfig.osdProfile.cap_alarm);
+        serialize16(masterConfig.osdProfile.time_alarm);
+        serialize16(masterConfig.osdProfile.alt_alarm);
+
         for (i = 0; i < OSD_MAX_ITEMS; i++) {
             serialize16(masterConfig.osdProfile.item_pos[i]);
         }
@@ -1267,10 +1274,10 @@ static bool processOutCommand(uint8_t cmdMSP)
         serialize16(currentProfile->pidProfile.yaw_p_limit);
         serialize8(currentProfile->pidProfile.deltaMethod);
         serialize8(currentProfile->pidProfile.vbatPidCompensation);
-        serialize8(currentProfile->pidProfile.ptermSetpointWeight);
+        serialize8(currentProfile->pidProfile.ptermSRateWeight);
         serialize8(currentProfile->pidProfile.dtermSetpointWeight);
-        serialize8(currentProfile->pidProfile.toleranceBand);
-        serialize8(currentProfile->pidProfile.toleranceBandReduction);
+        serialize8(0); // reserved
+        serialize8(0); // reserved
         serialize8(currentProfile->pidProfile.itermThrottleGain);
         serialize16(currentProfile->pidProfile.rateAccelLimit);
         serialize16(currentProfile->pidProfile.yawRateAccelLimit);
@@ -1580,6 +1587,11 @@ static bool processInCommand(void)
         // set all the other settings
         if ((int8_t)addr == -1) {
             masterConfig.osdProfile.video_system = read8();
+            masterConfig.osdProfile.units = read8();
+            masterConfig.osdProfile.rssi_alarm = read8();
+            masterConfig.osdProfile.cap_alarm = read16();
+            masterConfig.osdProfile.time_alarm = read16();
+            masterConfig.osdProfile.alt_alarm = read16();
         }
         // set a position setting
         else {
@@ -1865,10 +1877,10 @@ static bool processInCommand(void)
         currentProfile->pidProfile.yaw_p_limit = read16();
         currentProfile->pidProfile.deltaMethod = read8();
         currentProfile->pidProfile.vbatPidCompensation = read8();
-        currentProfile->pidProfile.ptermSetpointWeight = read8();
+        currentProfile->pidProfile.ptermSRateWeight = read8();
         currentProfile->pidProfile.dtermSetpointWeight = read8();
-        currentProfile->pidProfile.toleranceBand = read8();
-        currentProfile->pidProfile.toleranceBandReduction = read8();
+        read8(); // reserved
+        read8(); // reserved
         currentProfile->pidProfile.itermThrottleGain = read8();
         currentProfile->pidProfile.rateAccelLimit = read16();
         currentProfile->pidProfile.yawRateAccelLimit = read16();
@@ -1878,7 +1890,7 @@ static bool processInCommand(void)
         masterConfig.baro_hardware = read8();
         masterConfig.mag_hardware = read8();
         break;
-       
+
     case MSP_SET_NAME:
         memset(masterConfig.name, 0, ARRAYLEN(masterConfig.name));
         for (i = 0; i < MIN(MAX_NAME_LENGTH, currentPort->dataSize); i++) {

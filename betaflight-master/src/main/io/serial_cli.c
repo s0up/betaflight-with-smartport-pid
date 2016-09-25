@@ -670,6 +670,7 @@ const clivalue_t valueTable[] = {
     { "max_throttle",               VAR_UINT16 | MASTER_VALUE,  &masterConfig.escAndServoConfig.maxthrottle, .config.minmax = { PWM_RANGE_ZERO,  PWM_RANGE_MAX } },
     { "min_command",                VAR_UINT16 | MASTER_VALUE,  &masterConfig.escAndServoConfig.mincommand, .config.minmax = { PWM_RANGE_ZERO,  PWM_RANGE_MAX } },
     { "servo_center_pulse",         VAR_UINT16 | MASTER_VALUE,  &masterConfig.escAndServoConfig.servoCenterPulse, .config.minmax = { PWM_RANGE_ZERO,  PWM_RANGE_MAX } },
+    { "max_esc_throttle_jump",      VAR_UINT16 | MASTER_VALUE,  &masterConfig.escAndServoConfig.maxEscThrottleJumpMs, .config.minmax = { 0,  1000 } },
 
     { "3d_deadband_low",            VAR_UINT16 | MASTER_VALUE,  &masterConfig.flight3DConfig.deadband3d_low, .config.minmax = { PWM_RANGE_ZERO,  PWM_RANGE_MAX } }, // FIXME upper limit should match code in the mixer, 1500 currently
     { "3d_deadband_high",           VAR_UINT16 | MASTER_VALUE,  &masterConfig.flight3DConfig.deadband3d_high, .config.minmax = { PWM_RANGE_ZERO,  PWM_RANGE_MAX } }, // FIXME lower limit should match code in the mixer, 1500 currently,
@@ -849,11 +850,8 @@ const clivalue_t valueTable[] = {
     { "dterm_notch_cutoff",         VAR_UINT16 | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.dterm_notch_cutoff, .config.minmax = { 1,  500 } },
     { "vbat_pid_compensation",      VAR_UINT8  | PROFILE_VALUE | MODE_LOOKUP, &masterConfig.profile[0].pidProfile.vbatPidCompensation, .config.lookup = { TABLE_OFF_ON } },
     { "pid_at_min_throttle",        VAR_UINT8  | PROFILE_VALUE | MODE_LOOKUP, &masterConfig.profile[0].pidProfile.pidAtMinThrottle, .config.lookup = { TABLE_OFF_ON } },
-    { "pid_tolerance_band",         VAR_UINT8  | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.toleranceBand, .config.minmax = {0, 200 } },
-    { "tolerance_band_reduction",   VAR_UINT8  | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.toleranceBandReduction, .config.minmax = {0, 100 } },
-    { "zero_cross_allowance",       VAR_UINT8  | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.zeroCrossAllowanceCount, .config.minmax = {0, 50 } },
     { "iterm_throttle_gain",        VAR_UINT8  | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.itermThrottleGain, .config.minmax = {0, 200 } },
-    { "pterm_setpoint_weight",      VAR_UINT8  | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.ptermSetpointWeight, .config.minmax = {30, 100 } },
+    { "pterm_srate_ratio",          VAR_UINT8  | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.ptermSRateWeight, .config.minmax = {0, 100 } },
     { "dterm_setpoint_weight",      VAR_UINT8  | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.dtermSetpointWeight, .config.minmax = {0, 255 } },
     { "yaw_rate_accel_limit",       VAR_UINT16 | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.yawRateAccelLimit, .config.minmax = {0, 1000 } },
     { "rate_accel_limit",           VAR_UINT16 | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.rateAccelLimit, .config.minmax = {0, 1000 } },
@@ -915,22 +913,29 @@ const clivalue_t valueTable[] = {
     { "vtx_channel",                VAR_UINT8  | MASTER_VALUE, &masterConfig.vtx_channel, .config.minmax = { 0,  39 } },
     { "vtx_power",                  VAR_UINT8  | MASTER_VALUE, &masterConfig.vtx_power,   .config.minmax = { 0,  1 } },
 #endif
+
 #ifdef OSD
     { "osd_video_system",           VAR_UINT8  | MASTER_VALUE, &masterConfig.osdProfile.video_system, .config.minmax = { 0, 2 } },
-    { "osd_main_voltage_pos",       VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_MAIN_BATT_VOLTAGE], .config.minmax = { -480, 480 } },
-    { "osd_rssi_pos",               VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_RSSI_VALUE], .config.minmax = { -480, 480 } },
-    { "osd_timer_pos",              VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_TIMER], .config.minmax = { -480, 480 } },
-    { "osd_throttle_pos",           VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_THROTTLE_POS], .config.minmax = { -480, 480 } },
-    { "osd_cpu_load_pos",           VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_CPU_LOAD], .config.minmax = { -480, 480 } },
-    { "osd_vtx_channel_pos",        VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_VTX_CHANNEL], .config.minmax = { -480, 480 } },
-    { "osd_voltage_warning_pos",    VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_VOLTAGE_WARNING], .config.minmax = { -480, 480 } },
-    { "osd_armed_pos",              VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_ARMED], .config.minmax = { -480, 480 } },
-    { "osd_disarmed_pos",           VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_DISARMED], .config.minmax = { -480, 480 } },
-    { "osd_artificial_horizon",     VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_ARTIFICIAL_HORIZON], .config.minmax = { -1, 0 } },
-    { "osd_horizon_sidebars",       VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_HORIZON_SIDEBARS], .config.minmax = { -1, 0 } },
-    { "osd_current_draw_pos",       VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_CURRENT_DRAW], .config.minmax = { -480, 480 } },
-    { "osd_mah_drawn_pos",          VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_MAH_DRAWN], .config.minmax = { -480, 480 } },
-    { "osd_craft_name_pos",         VAR_INT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_CRAFT_NAME], .config.minmax = { -480, 480 } },
+    { "osd_units",                  VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, &masterConfig.osdProfile.units, .config.lookup = { TABLE_UNIT } },
+    { "osd_rssi_alarm",             VAR_UINT8 | MASTER_VALUE, &masterConfig.osdProfile.rssi_alarm, .config.minmax = { 0, 100 } },
+    { "osd_cap_alarm",              VAR_UINT16 | MASTER_VALUE, &masterConfig.osdProfile.cap_alarm, .config.minmax = { 0, 20000 } },
+    { "osd_time_alarm",             VAR_UINT16 | MASTER_VALUE, &masterConfig.osdProfile.time_alarm, .config.minmax = { 0, 60 } },
+    { "osd_alt_alarm",              VAR_UINT16 | MASTER_VALUE, &masterConfig.osdProfile.alt_alarm, .config.minmax = { 0, 10000 } },
+
+    { "osd_main_voltage_pos",       VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_MAIN_BATT_VOLTAGE], .config.minmax = { 0, 65536 } },
+    { "osd_rssi_pos",               VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_RSSI_VALUE], .config.minmax = { 0, 65536 } },
+    { "osd_flytimer_pos",           VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_FLYTIME], .config.minmax = { 0, 65536 } },
+    { "osd_ontime_pos",             VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_ONTIME], .config.minmax = { 0, 65536 } },
+    { "osd_flymode_pos",            VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_FLYMODE], .config.minmax = { 0, 65536 } },
+    { "osd_throttle_pos",           VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_THROTTLE_POS], .config.minmax = { 0, 65536 } },
+    { "osd_vtx_channel_pos",        VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_VTX_CHANNEL], .config.minmax = { 0, 65536 } },
+    { "osd_artificial_horizon",     VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_ARTIFICIAL_HORIZON], .config.minmax = { 0, 65536 } },
+    { "osd_current_draw_pos",       VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_CURRENT_DRAW], .config.minmax = { 0, 65536 } },
+    { "osd_mah_drawn_pos",          VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_MAH_DRAWN], .config.minmax = { 0, 65536 } },
+    { "osd_craft_name_pos",         VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_CRAFT_NAME], .config.minmax = { 0, 65536 } },
+    { "osd_gps_speed_pos",          VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_GPS_SPEED], .config.minmax = { 0, 65536 } },
+    { "osd_gps_sats_pos",           VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_GPS_SATS], .config.minmax = { 0, 65536 } },
+    { "osd_altitude",               VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_ALTITUDE], .config.minmax = { 0, 65536 } },
 #endif
 };
 
@@ -3465,7 +3470,7 @@ static void cliStatus(char *cmdline)
 
 #ifdef USE_SDCARD
     cliSdInfo(NULL);
-#endif   
+#endif
 }
 
 #ifndef SKIP_TASK_STATISTICS
