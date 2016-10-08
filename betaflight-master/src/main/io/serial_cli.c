@@ -515,7 +515,7 @@ static const char * const lookupTableRcInterpolation[] = {
 };
 
 static const char * const lookupTableLowpassType[] = {
-    "NORMAL", "HIGH"
+    "NORMAL", "HIGH", "DENOISE"
 };
 
 static const char * const lookupTableFailsafe[] = {
@@ -773,8 +773,10 @@ const clivalue_t valueTable[] = {
     { "gyro_sync_denom",            VAR_UINT8  | MASTER_VALUE,  &masterConfig.gyro_sync_denom, .config.minmax = { 1,  8 } },
     { "gyro_lowpass_level",         VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP,  &masterConfig.gyro_soft_type, .config.lookup = { TABLE_LOWPASS_TYPE } },
     { "gyro_lowpass",               VAR_UINT8  | MASTER_VALUE,  &masterConfig.gyro_soft_lpf_hz, .config.minmax = { 0,  255 } },
-    { "gyro_notch_hz",              VAR_UINT16 | MASTER_VALUE,  &masterConfig.gyro_soft_notch_hz, .config.minmax = { 0,  500 } },
-    { "gyro_notch_cutoff",          VAR_UINT16 | MASTER_VALUE,  &masterConfig.gyro_soft_notch_cutoff, .config.minmax = { 1,  500 } },
+    { "gyro_notch_hz_1",            VAR_UINT16 | MASTER_VALUE,  &masterConfig.gyro_soft_notch_hz_1, .config.minmax = { 0,  1000 } },
+    { "gyro_notch_cutoff_1",        VAR_UINT16 | MASTER_VALUE,  &masterConfig.gyro_soft_notch_cutoff_1, .config.minmax = { 1,  1000 } },
+    { "gyro_notch_hz_2",            VAR_UINT16 | MASTER_VALUE,  &masterConfig.gyro_soft_notch_hz_2, .config.minmax = { 0,  1000 } },
+    { "gyro_notch_cutoff_2",        VAR_UINT16 | MASTER_VALUE,  &masterConfig.gyro_soft_notch_cutoff_2, .config.minmax = { 1, 1000 } },
     { "moron_threshold",            VAR_UINT8  | MASTER_VALUE,  &masterConfig.gyroConfig.gyroMovementCalibrationThreshold, .config.minmax = { 0,  128 } },
     { "imu_dcm_kp",                 VAR_UINT16 | MASTER_VALUE,  &masterConfig.dcm_kp, .config.minmax = { 0,  50000 } },
     { "imu_dcm_ki",                 VAR_UINT16 | MASTER_VALUE,  &masterConfig.dcm_ki, .config.minmax = { 0,  50000 } },
@@ -791,6 +793,7 @@ const clivalue_t valueTable[] = {
 
     { "yaw_motor_direction",        VAR_INT8   | MASTER_VALUE, &masterConfig.mixerConfig.yaw_motor_direction, .config.minmax = { -1,  1 } },
     { "yaw_p_limit",                VAR_UINT16 | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.yaw_p_limit, .config.minmax = { YAW_P_LIMIT_MIN, YAW_P_LIMIT_MAX } },
+    { "pidsum_limit",               VAR_UINT16 | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.pidSumLimit, .config.minmax = { 100, 1000 } },
 #ifdef USE_SERVOS
     { "tri_unarmed_servo",          VAR_INT8   | MASTER_VALUE | MODE_LOOKUP, &masterConfig.mixerConfig.tri_unarmed_servo, .config.lookup = { TABLE_OFF_ON } },
     { "servo_lowpass_freq",         VAR_UINT16 | MASTER_VALUE, &masterConfig.mixerConfig.servo_lowpass_freq, .config.minmax = { 10,  400} },
@@ -851,7 +854,7 @@ const clivalue_t valueTable[] = {
     { "vbat_pid_compensation",      VAR_UINT8  | PROFILE_VALUE | MODE_LOOKUP, &masterConfig.profile[0].pidProfile.vbatPidCompensation, .config.lookup = { TABLE_OFF_ON } },
     { "pid_at_min_throttle",        VAR_UINT8  | PROFILE_VALUE | MODE_LOOKUP, &masterConfig.profile[0].pidProfile.pidAtMinThrottle, .config.lookup = { TABLE_OFF_ON } },
     { "iterm_throttle_gain",        VAR_UINT8  | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.itermThrottleGain, .config.minmax = {0, 200 } },
-    { "pterm_srate_ratio",          VAR_UINT8  | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.ptermSRateWeight, .config.minmax = {0, 100 } },
+    { "setpoint_relax_ratio",       VAR_UINT8  | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.setpointRelaxRatio, .config.minmax = {0, 100 } },
     { "dterm_setpoint_weight",      VAR_UINT8  | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.dtermSetpointWeight, .config.minmax = {0, 255 } },
     { "yaw_rate_accel_limit",       VAR_UINT16 | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.yawRateAccelLimit, .config.minmax = {0, 1000 } },
     { "rate_accel_limit",           VAR_UINT16 | PROFILE_VALUE, &masterConfig.profile[0].pidProfile.rateAccelLimit, .config.minmax = {0, 1000 } },
@@ -917,7 +920,8 @@ const clivalue_t valueTable[] = {
 #ifdef OSD
     { "osd_video_system",           VAR_UINT8  | MASTER_VALUE, &masterConfig.osdProfile.video_system, .config.minmax = { 0, 2 } },
     { "osd_units",                  VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, &masterConfig.osdProfile.units, .config.lookup = { TABLE_UNIT } },
-    { "osd_rssi_alarm",             VAR_UINT8 | MASTER_VALUE, &masterConfig.osdProfile.rssi_alarm, .config.minmax = { 0, 100 } },
+
+    { "osd_rssi_alarm",             VAR_UINT8  | MASTER_VALUE, &masterConfig.osdProfile.rssi_alarm, .config.minmax = { 0, 100 } },
     { "osd_cap_alarm",              VAR_UINT16 | MASTER_VALUE, &masterConfig.osdProfile.cap_alarm, .config.minmax = { 0, 20000 } },
     { "osd_time_alarm",             VAR_UINT16 | MASTER_VALUE, &masterConfig.osdProfile.time_alarm, .config.minmax = { 0, 60 } },
     { "osd_alt_alarm",              VAR_UINT16 | MASTER_VALUE, &masterConfig.osdProfile.alt_alarm, .config.minmax = { 0, 10000 } },
@@ -929,13 +933,14 @@ const clivalue_t valueTable[] = {
     { "osd_flymode_pos",            VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_FLYMODE], .config.minmax = { 0, 65536 } },
     { "osd_throttle_pos",           VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_THROTTLE_POS], .config.minmax = { 0, 65536 } },
     { "osd_vtx_channel_pos",        VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_VTX_CHANNEL], .config.minmax = { 0, 65536 } },
+    { "osd_crosshairs",             VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_CROSSHAIRS], .config.minmax = { 0, 65536 } },
     { "osd_artificial_horizon",     VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_ARTIFICIAL_HORIZON], .config.minmax = { 0, 65536 } },
     { "osd_current_draw_pos",       VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_CURRENT_DRAW], .config.minmax = { 0, 65536 } },
     { "osd_mah_drawn_pos",          VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_MAH_DRAWN], .config.minmax = { 0, 65536 } },
     { "osd_craft_name_pos",         VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_CRAFT_NAME], .config.minmax = { 0, 65536 } },
     { "osd_gps_speed_pos",          VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_GPS_SPEED], .config.minmax = { 0, 65536 } },
     { "osd_gps_sats_pos",           VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_GPS_SATS], .config.minmax = { 0, 65536 } },
-    { "osd_altitude",               VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_ALTITUDE], .config.minmax = { 0, 65536 } },
+    { "osd_altitude_pos",           VAR_UINT16  | MASTER_VALUE, &masterConfig.osdProfile.item_pos[OSD_ALTITUDE], .config.minmax = { 0, 65536 } },
 #endif
 };
 

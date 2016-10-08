@@ -16,7 +16,7 @@
 #
 
 # The target to build, see VALID_TARGETS below
-TARGET    ?= RMDO
+TARGET    ?= OMNIBUS
 
 # Compile-time options
 OPTIONS   ?=
